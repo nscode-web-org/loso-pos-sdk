@@ -1,4 +1,4 @@
-# @loso/pos-sdk
+# @nscodecom/loso-pos-sdk
 
 [![CI](https://github.com/nscode-web-org/loso-pos-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/nscode-web-org/loso-pos-sdk/actions/workflows/ci.yml)
 
@@ -14,13 +14,13 @@ Deno, Bun, edge). This is the supported replacement for hand-copying a reference
 ## Install
 
 ```bash
-npm install @loso/pos-sdk
+npm install @nscodecom/loso-pos-sdk
 ```
 
 ## Quick start
 
 ```ts
-import { LosoPosClient } from '@loso/pos-sdk';
+import { LosoPosClient } from '@nscodecom/loso-pos-sdk';
 
 const loso = new LosoPosClient({
   baseUrl: 'https://api.loso.example', // the /api/pos/v1 prefix is added for you
@@ -122,11 +122,16 @@ Publishing is automated: pushing a `v*` tag triggers the
 
 **One-time setup:**
 
-1. Create a free npm organization named `loso` at [npmjs.com](https://www.npmjs.com) (Add
-   Organization → free for public packages).
-2. Create an npm **Automation** access token (npm → Access Tokens → Generate → *Automation*).
+1. Publish rights on the `nscodecom` npm organization, which owns the `@nscodecom` scope. Check
+   with `npm org ls nscodecom <your-username>` — publishing needs `owner` or `developer`.
+2. Create an npm **Granular Access Token** (npm → Access Tokens → Generate → *Granular Access
+   Token*) with **read and write** on the `@nscodecom` scope. A classic *Automation* token is
+   rejected: npm now requires a granular token with 2FA bypass to publish from CI.
 3. Add it to the repo as a secret named `NPM_TOKEN`
    (GitHub → Settings → Secrets and variables → Actions → New repository secret).
+4. If the publishing account has two-factor auth set to `auth-and-writes` (check with
+   `npm profile get`), no CI token can publish. Set it to authorization-only, or ensure the
+   granular token has 2FA bypass enabled.
 
 **Each release:**
 
