@@ -1,5 +1,5 @@
 {
-  "name": "@loso/pos-sdk",
+  "name": "@nscodecom/loso-pos-sdk",
   "version": "0.1.0",
   "description": "Typed client for the Loso POS loyalty API (/api/pos/v1). Grant and spend loyalty on a sale while speaking only in money.",
   "keywords": [
