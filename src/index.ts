@@ -1,6 +1,7 @@
 export { LosoPosClient } from './client.js';
 export type {
   FetchLike,
+  LosoPosAuthMode,
   LosoPosClientOptions,
   RetryOptions,
 } from './client.js';

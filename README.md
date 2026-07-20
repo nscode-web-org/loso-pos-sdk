@@ -85,7 +85,7 @@ returns immediately.
 ## API
 
 ```ts
-new LosoPosClient({ baseUrl, apiKey, fetch?, timeoutMs? });
+new LosoPosClient({ baseUrl, apiKey, auth?, fetch?, timeoutMs? });
 
 loso.getConfig(): Promise<PosEnvelope<PosConfig>>;
 loso.resolveCustomer(code): Promise<PosEnvelope<PosCustomer>>;
@@ -98,6 +98,10 @@ loso.commitWithRetry(request, options?): Promise<PosEnvelope<PosCommitResponse>>
 loso.refundWithRetry(loyaltyReference, request, options?): Promise<PosEnvelope<PosRefundResponse>>;
 ```
 
+- **`auth`** — `'key'` (default) sends `Authorization: Bearer <apiKey>`. `'proxy'` sends no
+  `Authorization` header at all, for when `baseUrl` points at your own backend, which holds the
+  key. In proxy mode `apiKey` must be omitted; passing one is an error rather than silently
+  ignored, so a key can't sit unnoticed in a browser bundle.
 - **`fetch`** — defaults to `globalThis.fetch`. Pass your own on Node < 18, or to route through a
   proxy / add logging.
 - **`timeoutMs`** — per-request, default `10000`. Keep it short on `commit`.
@@ -106,8 +110,19 @@ loso.refundWithRetry(loyaltyReference, request, options?): Promise<PosEnvelope<P
 
 A POS key authenticates as the merchant. **A browser is the wrong place to hold a live key** —
 anyone with devtools can read it. In production, keep the key in your backend or native app and
-have the browser talk to *your* server, which calls Loso. Point `baseUrl` (or a custom `fetch`) at
-that proxy. Use `pos_test_…` keys for browser demos.
+have the browser talk to *your* server, which calls Loso.
+
+```ts
+// In the browser: no key, ever.
+const loso = new LosoPosClient({ baseUrl: 'https://till.vendor.example/loyalty', auth: 'proxy' });
+
+// On your backend: the key, and the real Loso base URL.
+const upstream = new LosoPosClient({ baseUrl: 'https://api.loso.example', apiKey: process.env.LOSO_POS_KEY });
+```
+
+Use `pos_test_…` keys for browser demos. If you want drop-in UI rather than wiring this yourself,
+[`@nscodecom/loso-pos-elements`](https://github.com/nscode-web-org/loso-pos-elements) builds on
+this package and is proxy-only by construction.
 
 ## Compatibility
 

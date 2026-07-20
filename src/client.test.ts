@@ -50,6 +50,16 @@ describe('LosoPosClient — construction', () => {
     expect(() => new LosoPosClient({ baseUrl: 'x', apiKey: '', fetch: mockFetch([]).fetch })).toThrow(/apiKey/);
   });
 
+  it('allows a missing apiKey in proxy mode, and refuses one that is supplied', () => {
+    expect(
+      () => new LosoPosClient({ baseUrl: 'x', auth: 'proxy', fetch: mockFetch([]).fetch })
+    ).not.toThrow();
+    // Silently dropping it would hide a live key sitting in a browser bundle.
+    expect(
+      () => new LosoPosClient({ baseUrl: 'x', auth: 'proxy', apiKey: 'pos_live_x', fetch: mockFetch([]).fetch })
+    ).toThrow(/proxy/);
+  });
+
   it('throws when no fetch is available', () => {
     const original = globalThis.fetch;
     // @ts-expect-error — deliberately remove fetch for the test
@@ -70,6 +80,15 @@ describe('LosoPosClient — requests', () => {
     expect(calls[0]?.url).toBe('https://api.loso.example/api/pos/v1/config');
     expect(calls[0]?.headers?.['Authorization']).toBe('Bearer pos_test_abc');
     expect(result.ok && result.data.currency).toBe('BAM');
+  });
+
+  it('sends no Authorization header in proxy mode', async () => {
+    const { fetch, calls } = mockFetch([{ body: ok({ currency: 'BAM' }) }]);
+    const client = new LosoPosClient({ baseUrl: 'https://till.vendor.example', auth: 'proxy', fetch });
+    await client.getConfig();
+
+    expect(calls[0]?.url).toBe('https://till.vendor.example/api/pos/v1/config');
+    expect(calls[0]?.headers?.['Authorization']).toBeUndefined();
   });
 
   it('url-encodes the resolve code', async () => {
