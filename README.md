@@ -5,7 +5,7 @@
 Typed client for the **Loso POS loyalty API** (`/api/pos/v1`). Grant and spend loyalty on a sale
 while speaking only in money — you never deal with points arithmetic.
 
-Framework-agnostic, zero runtime dependencies, runs anywhere `fetch` exists (browsers, Node 18+,
+Framework-agnostic, zero runtime dependencies, runs anywhere `fetch` exists (browsers, Node 20.19+,
 Deno, Bun, edge). This is the supported replacement for hand-copying a reference client.
 
 - **Full wire contract:** [`docs/pos-integration/api-guide.md`](../../docs/pos-integration/api-guide.md)

@@ -3,7 +3,7 @@ version: 2
 updates:
   # npm dev tooling — tsup, typescript, vitest. The package has no runtime
   # dependencies, so everything here is build/test tooling; group it into one
-  # weekly PR to keep the noise down. CI (Node 18/20/22) gates each update, and
+  # weekly PR to keep the noise down. CI (Node 20/22/24) gates each update, and
   # scoping the group to development means a future runtime dependency would get
   # its own PR for individual review rather than being folded in silently.
   - package-ecosystem: npm

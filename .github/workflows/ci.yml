@@ -1,7 +1,7 @@
 name: CI
 
 # Typecheck, test, and build on every push to main and every pull request,
-# across the Node versions the package claims to support (engines: >=18).
+# across the Node versions the package claims to support (engines: >=20.19).
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [18, 20, 22]
+        node: [20, 22, 24]
     name: node ${{ matrix.node }}
     steps:
       - uses: actions/checkout@v7
