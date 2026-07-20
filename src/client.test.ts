@@ -54,9 +54,17 @@ describe('LosoPosClient — construction', () => {
     expect(
       () => new LosoPosClient({ baseUrl: 'x', auth: 'proxy', fetch: mockFetch([]).fetch })
     ).not.toThrow();
-    // Silently dropping it would hide a live key sitting in a browser bundle.
+    // Silently dropping it would hide a live key sitting in a browser bundle. The type
+    // refuses this too — the runtime check is the backstop for untyped callers.
     expect(
-      () => new LosoPosClient({ baseUrl: 'x', auth: 'proxy', apiKey: 'pos_live_x', fetch: mockFetch([]).fetch })
+      () =>
+        // @ts-expect-error apiKey is not accepted in proxy mode
+        new LosoPosClient({
+          baseUrl: 'x',
+          auth: 'proxy',
+          apiKey: 'pos_live_x',
+          fetch: mockFetch([]).fetch,
+        })
     ).toThrow(/proxy/);
   });
 

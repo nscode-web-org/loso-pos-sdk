@@ -37,19 +37,9 @@ export type FetchLike = (
  */
 export type LosoPosAuthMode = 'key' | 'proxy';
 
-export interface LosoPosClientOptions {
+interface LosoPosClientCommonOptions {
   /** e.g. `https://api.loso.example`. The `/api/pos/v1` prefix is added for you. */
   baseUrl: string;
-  /**
-   * The merchant's POS key, `pos_live_…` or `pos_test_…`. Sent as a bearer token.
-   * Required unless `auth` is `'proxy'`, where it must be omitted.
-   */
-  apiKey?: string;
-  /**
-   * Authentication mode. Defaults to `'key'`. See {@link LosoPosAuthMode} — use `'proxy'` from a
-   * browser so a live key never sits in a page.
-   */
-  auth?: LosoPosAuthMode;
   /**
    * Transport. Defaults to `globalThis.fetch`. Supply your own for Node < 18, a proxy, mTLS,
    * or request logging. A browser page should point this (or `baseUrl`) at your own backend
@@ -59,6 +49,28 @@ export interface LosoPosClientOptions {
   /** Per-request timeout in milliseconds. Default 10000. Keep it short on `commit`. */
   timeoutMs?: number;
 }
+
+/** Direct mode: this client holds the merchant's key and sends it. The default. */
+export interface LosoPosKeyAuthOptions extends LosoPosClientCommonOptions {
+  /** The merchant's POS key, `pos_live_…` or `pos_test_…`. Sent as a bearer token. */
+  apiKey: string;
+  auth?: 'key';
+}
+
+/** Proxy mode: this client holds no credentials — your backend attaches them. */
+export interface LosoPosProxyAuthOptions extends LosoPosClientCommonOptions {
+  auth: 'proxy';
+  /** Not accepted in proxy mode: the key belongs on your backend, not in this client. */
+  apiKey?: never;
+}
+
+/**
+ * A discriminated union rather than an optional `apiKey`, so the compiler enforces what the
+ * constructor checks: a key is required in the default mode and refused in proxy mode. Making
+ * `apiKey` merely optional would let `new LosoPosClient({ baseUrl })` typecheck and fail only at
+ * runtime.
+ */
+export type LosoPosClientOptions = LosoPosKeyAuthOptions | LosoPosProxyAuthOptions;
 
 /** Options for the auto-retrying commit/refund helpers. */
 export interface RetryOptions {

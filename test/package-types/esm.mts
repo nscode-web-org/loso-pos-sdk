@@ -15,7 +15,15 @@ const wrongType: number = generateIdempotencyKey();
 // @ts-expect-error apiKey is required
 const missingOption = new LosoPosClient({ baseUrl: 'https://example.test' });
 
+// Proxy mode takes no key, and refuses one.
+const proxied = new LosoPosClient({ baseUrl: 'https://till.example', auth: 'proxy' });
+
+// @ts-expect-error apiKey is not accepted in proxy mode
+const proxiedWithKey = new LosoPosClient({ baseUrl: 'https://till.example', auth: 'proxy', apiKey: 'pos_live_x' });
+
 void config;
 void key;
 void wrongType;
 void missingOption;
+void proxied;
+void proxiedWithKey;
