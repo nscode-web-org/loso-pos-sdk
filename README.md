@@ -118,20 +118,27 @@ ship as a major release.
 
 Publishing is automated: pushing a `v*` tag triggers the
 [`publish`](.github/workflows/publish.yml) workflow, which typechecks, tests, builds, and runs
-`npm publish` with provenance.
+`npm publish`.
+
+Authentication uses npm **trusted publishing** (OIDC) — no `NPM_TOKEN` secret is involved. GitHub
+Actions presents a short-lived signed token that npm verifies against the trusted publisher
+configured for this package. This works with two-factor auth enabled on the account, which
+token-based publishing does not: npm is restricting 2FA-bypass tokens for direct publishing.
+Provenance is attached automatically.
 
 **One-time setup:**
 
 1. Publish rights on the `nscodecom` npm organization, which owns the `@nscodecom` scope. Check
    with `npm org ls nscodecom <your-username>` — publishing needs `owner` or `developer`.
-2. Create an npm **Granular Access Token** (npm → Access Tokens → Generate → *Granular Access
-   Token*) with **read and write** on the `@nscodecom` scope. A classic *Automation* token is
-   rejected: npm now requires a granular token with 2FA bypass to publish from CI.
-3. Add it to the repo as a secret named `NPM_TOKEN`
-   (GitHub → Settings → Secrets and variables → Actions → New repository secret).
-4. If the publishing account has two-factor auth set to `auth-and-writes` (check with
-   `npm profile get`), no CI token can publish. Set it to authorization-only, or ensure the
-   granular token has 2FA bypass enabled.
+2. On npmjs.com, open the package → **Settings** → **Trusted Publisher** → GitHub Actions, and
+   enter:
+   - Organization: `nscode-web-org`
+   - Repository: `loso-pos-sdk`
+   - Workflow filename: `publish.yml`
+
+The trusted publisher is configured per package, so the package must already exist on npm. The
+first release therefore has to be published manually (`npm publish --access public`, which prompts
+for a 2FA code); every tagged release after that goes through CI.
 
 **Each release:**
 
