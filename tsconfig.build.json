@@ -1,0 +1,12 @@
+{
+  // Declaration emit for the published package. Same compiler options as the
+  // root config, minus the tests — those are typechecked by `npm run typecheck`
+  // but must not end up as .d.ts files in dist/.
+  "extends": "./tsconfig.json",
+  // TypeScript 7 requires rootDir to be explicit rather than inferring it from
+  // the common source directory, so dist/ gets index.d.ts and not src/index.d.ts.
+  "compilerOptions": {
+    "rootDir": "src"
+  },
+  "exclude": ["src/**/*.test.ts"]
+}
