@@ -3,7 +3,10 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: ['src/index.ts'],
   format: ['esm', 'cjs'],
-  dts: true,
+  // Declarations come from tsc (`npm run build:types`), not tsup: tsup bundles
+  // rollup-plugin-dts built against the TypeScript 5.7 compiler API, which
+  // crashes on TypeScript 7.
+  dts: false,
   clean: true,
   sourcemap: true,
   minify: false,
