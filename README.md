@@ -8,8 +8,8 @@ while speaking only in money — you never deal with points arithmetic.
 Framework-agnostic, zero runtime dependencies, runs anywhere `fetch` exists (browsers, Node 20.19+,
 Deno, Bun, edge). This is the supported replacement for hand-copying a reference client.
 
-- **Full wire contract:** [`docs/pos-integration/api-guide.md`](../../docs/pos-integration/api-guide.md)
-- **Visual walkthrough:** the vendor guide (`how-it-works.html`)
+- **Full wire contract:** the POS integration guide — request it from your Loso contact.
+- **Visual walkthrough:** the vendor guide (`how-it-works.html`), available on request.
 
 ## Install
 
