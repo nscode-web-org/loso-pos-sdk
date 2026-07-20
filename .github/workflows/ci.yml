@@ -32,3 +32,8 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+      # Packs the tarball and typechecks ESM + CJS consumers against it. The
+      # steps above all pass while the published package is unusable, so this
+      # is the only one that covers the exports map and the .d.ts/.d.cts split.
+      - run: npm run test:package-types
