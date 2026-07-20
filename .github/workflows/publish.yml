@@ -11,7 +11,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write # lets npm attach build provenance (public repo only)
+  id-token: write # OIDC token for npm trusted publishing (and provenance)
 
 jobs:
   publish:
@@ -21,8 +21,16 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          # Trusted publishing needs Node >= 22.14.0.
+          node-version: 22
           registry-url: 'https://registry.npmjs.org'
+          # Disabled for release builds so the publish never runs against a
+          # restored cache.
+          package-manager-cache: false
+
+      # Node 22 ships npm 10.x; trusted publishing needs npm >= 11.5.1.
+      - name: Upgrade npm
+        run: npm install -g npm@latest
 
       - name: Verify the tag matches package.json
         run: |
@@ -38,7 +46,9 @@ jobs:
       - run: npm test
       - run: npm run build
 
+      # No NODE_AUTH_TOKEN: npm authenticates via the OIDC token from the
+      # id-token permission above, against the trusted publisher configured on
+      # npmjs.com for this package. Provenance is attached automatically, so
+      # --provenance is not passed.
       - name: Publish to npm
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
