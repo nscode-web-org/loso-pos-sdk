@@ -1,0 +1,16 @@
+{
+  // Consumer-side config: deliberately NOT extending the root tsconfig, since
+  // the point is to resolve the package the way an outside consumer would.
+  // node16 is the strict case — it enforces the ESM/CJS split that bundler
+  // resolution papers over.
+  "compilerOptions": {
+    "strict": true,
+    "module": "node16",
+    "moduleResolution": "node16",
+    "target": "es2022",
+    "lib": ["ES2022", "DOM"],
+    "types": [],
+    "noEmit": true
+  },
+  "files": ["esm.mts", "cjs.cts"]
+}
