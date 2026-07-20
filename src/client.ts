@@ -27,11 +27,19 @@ export type FetchLike = (
   text: () => Promise<string>;
 }>;
 
-export interface LosoPosClientOptions {
+/**
+ * How the client authenticates.
+ *
+ * - `'key'` (default) — send `Authorization: Bearer <apiKey>`. `apiKey` is required.
+ * - `'proxy'` — send **no** `Authorization` header. `baseUrl` points at your own backend, which
+ *   holds the merchant's key and attaches it server-side. This is the only safe posture for a
+ *   browser: the key never reaches the page. Passing an `apiKey` in this mode is refused.
+ */
+export type LosoPosAuthMode = 'key' | 'proxy';
+
+interface LosoPosClientCommonOptions {
   /** e.g. `https://api.loso.example`. The `/api/pos/v1` prefix is added for you. */
   baseUrl: string;
-  /** The merchant's POS key, `pos_live_…` or `pos_test_…`. Sent as a bearer token. */
-  apiKey: string;
   /**
    * Transport. Defaults to `globalThis.fetch`. Supply your own for Node < 18, a proxy, mTLS,
    * or request logging. A browser page should point this (or `baseUrl`) at your own backend
@@ -41,6 +49,28 @@ export interface LosoPosClientOptions {
   /** Per-request timeout in milliseconds. Default 10000. Keep it short on `commit`. */
   timeoutMs?: number;
 }
+
+/** Direct mode: this client holds the merchant's key and sends it. The default. */
+export interface LosoPosKeyAuthOptions extends LosoPosClientCommonOptions {
+  /** The merchant's POS key, `pos_live_…` or `pos_test_…`. Sent as a bearer token. */
+  apiKey: string;
+  auth?: 'key';
+}
+
+/** Proxy mode: this client holds no credentials — your backend attaches them. */
+export interface LosoPosProxyAuthOptions extends LosoPosClientCommonOptions {
+  auth: 'proxy';
+  /** Not accepted in proxy mode: the key belongs on your backend, not in this client. */
+  apiKey?: never;
+}
+
+/**
+ * A discriminated union rather than an optional `apiKey`, so the compiler enforces what the
+ * constructor checks: a key is required in the default mode and refused in proxy mode. Making
+ * `apiKey` merely optional would let `new LosoPosClient({ baseUrl })` typecheck and fail only at
+ * runtime.
+ */
+export type LosoPosClientOptions = LosoPosKeyAuthOptions | LosoPosProxyAuthOptions;
 
 /** Options for the auto-retrying commit/refund helpers. */
 export interface RetryOptions {
@@ -63,7 +93,7 @@ const DEFAULT_TIMEOUT_MS = 10_000;
  */
 export class LosoPosClient {
   private readonly baseUrl: string;
-  private readonly apiKey: string;
+  private readonly apiKey: string | undefined;
   private readonly fetchImpl: FetchLike;
   private readonly timeoutMs: number;
 
@@ -71,8 +101,18 @@ export class LosoPosClient {
     if (!options?.baseUrl) {
       throw new Error('LosoPosClient: `baseUrl` is required.');
     }
-    if (!options.apiKey) {
+
+    const auth: LosoPosAuthMode = options.auth ?? 'key';
+    if (auth === 'key' && !options.apiKey) {
       throw new Error('LosoPosClient: `apiKey` is required.');
+    }
+    // Refused rather than ignored: a key passed in proxy mode means the caller believes it is
+    // being sent, and a silent drop would hide a credential sitting in a browser bundle.
+    if (auth === 'proxy' && options.apiKey) {
+      throw new Error(
+        'LosoPosClient: `apiKey` must be omitted when `auth` is "proxy" — the key belongs on ' +
+          'your backend, which attaches it to the forwarded request.'
+      );
     }
 
     const fetchImpl = options.fetch ?? (globalThis.fetch as FetchLike | undefined);
@@ -84,7 +124,7 @@ export class LosoPosClient {
 
     // Trim: keys get pasted, and pasted things carry whitespace.
     this.baseUrl = options.baseUrl.replace(/\/+$/, '');
-    this.apiKey = options.apiKey.trim();
+    this.apiKey = options.apiKey?.trim();
     this.fetchImpl = fetchImpl;
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   }
@@ -189,9 +229,11 @@ export class LosoPosClient {
     idempotencyKey?: string
   ): Promise<PosEnvelope<T>> {
     const url = `${this.baseUrl}${API_PREFIX}${path}`;
-    const headers: Record<string, string> = {
-      Authorization: `Bearer ${this.apiKey}`,
-    };
+    const headers: Record<string, string> = {};
+    // Absent in proxy mode — the backend behind `baseUrl` attaches the merchant's credentials.
+    if (this.apiKey) {
+      headers['Authorization'] = `Bearer ${this.apiKey}`;
+    }
     if (body !== undefined) {
       headers['Content-Type'] = 'application/json';
     }

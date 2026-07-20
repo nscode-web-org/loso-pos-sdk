@@ -1,7 +1,10 @@
 export { LosoPosClient } from './client.js';
 export type {
   FetchLike,
+  LosoPosAuthMode,
   LosoPosClientOptions,
+  LosoPosKeyAuthOptions,
+  LosoPosProxyAuthOptions,
   RetryOptions,
 } from './client.js';
 export { generateIdempotencyKey } from './idempotency.js';
