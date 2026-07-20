@@ -1,0 +1,56 @@
+{
+  "name": "@loso/pos-sdk",
+  "version": "0.1.0",
+  "description": "Typed client for the Loso POS loyalty API (/api/pos/v1). Grant and spend loyalty on a sale while speaking only in money.",
+  "keywords": [
+    "loso",
+    "pos",
+    "loyalty",
+    "sdk",
+    "point-of-sale",
+    "ecr"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nscode-web-org/loso-pos-sdk.git"
+  },
+  "homepage": "https://github.com/nscode-web-org/loso-pos-sdk#readme",
+  "bugs": "https://github.com/nscode-web-org/loso-pos-sdk/issues",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0",
+    "typescript": "~5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
